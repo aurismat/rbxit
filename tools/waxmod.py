@@ -57,28 +57,31 @@ with open(waxfile, 'rb') as f:
 print("Reading new audio WAV file ", wavfile)
 with open(wavfile, "rb") as ff:
     header = ff.read(44)
-    data = ff.read()
-    headerfields = struct.unpack("<IIIIIHHIIHHII", header)
-    isRiff,             \
-        filesize,       \
-        filetype,       \
+    headerfields = struct.unpack("<IIIIIHHIIHH4sI", header)
+    chunkID,            \
+        chunkSize,      \
         fmt,            \
-        lFmtData,       \
-        formatType,     \
+        Subchunk1ID,    \
+        Subchunk1Size,  \
+        aFormat,        \
         channels,       \
         samples,        \
         rate,           \
-        idk,            \
+        blockalign,     \
         bits,           \
         dHeader,        \
         fSize           = headerfields;
+    data = ff.read()
+    print("datasize is ", fSize)
+    
 #write new wax file
 print("Overwriting WAX file ", waxfile, " with new audio data")
+newlen = (len(data) - 98)
 with open(waxfile, "wb") as ff:
     headdata = struct.pack("<4sIIHHIIHH2s",
                             waxID,
                             WAX_PCM,
-                            len(data),
+                            fSize,
                             1,
                             channels,
                             samples,
